@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingliz Tili Testi – 1-kurs</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f14;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d3a;
+    --accent: #5b8dee;
+    --accent2: #7c6df7;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e8eaf0;
+    --muted: #7b829a;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1d2e 0%, #12141c 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px 22px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    flex: 1;
+    min-width: 200px;
+  }
+  .header-title span { color: var(--accent); }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 2;
+    min-width: 250px;
+  }
+  .progress-bar-outer {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+  .score-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 6px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* MAIN */
+  .main { max-width: 780px; margin: 0 auto; padding: 40px 24px 100px; }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .q-card.answered-correct { border-color: var(--green); }
+  .q-card.answered-wrong { border-color: var(--red); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .q-num {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 8px;
+    min-width: 36px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .q-text {
+    font-size: 1.0rem;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .q-status {
+    margin-left: auto;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .q-card.answered-correct .q-status { opacity: 1; }
+  .q-card.answered-wrong .q-status { opacity: 1; }
+
+  /* OPTIONS */
+  .options { padding: 16px 22px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .option-btn:not(.disabled):hover {
+    border-color: var(--accent);
+    background: #1e2540;
+    transform: translateX(3px);
+  }
+  .option-btn.disabled { cursor: not-allowed; }
+  .option-btn.selected-correct {
+    background: rgba(52,211,153,0.12);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .option-btn.selected-wrong {
+    background: rgba(248,113,113,0.12);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .option-btn.reveal-correct {
+    background: rgba(52,211,153,0.07);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .opt-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+  .selected-correct .opt-letter { background: var(--green); color: #0a1a12; }
+  .selected-wrong .opt-letter { background: var(--red); color: #1a0808; }
+  .reveal-correct .opt-letter { background: var(--green); color: #0a1a12; }
+
+  /* RESULT SCREEN */
+  #result-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+    animation: fadeIn 0.5s ease;
+  }
+  #result-screen.show { display: block; }
+  .result-emoji { font-size: 5rem; margin-bottom: 16px; }
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    margin-bottom: 8px;
+  }
+  .result-title.great { color: var(--green); }
+  .result-title.good { color: var(--yellow); }
+  .result-title.ok { color: #fb923c; }
+  .result-title.retry { color: var(--red); }
+  .result-sub { color: var(--muted); font-size: 1.05rem; margin-bottom: 36px; }
+
+  .result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 32px;
+    min-width: 140px;
+  }
+  .stat-num { font-size: 2.4rem; font-weight: 700; margin-bottom: 4px; }
+  .stat-num.correct { color: var(--green); }
+  .stat-num.wrong { color: var(--red); }
+  .stat-num.pct { color: var(--accent); }
+  .stat-label { color: var(--muted); font-size: 0.85rem; }
+
+  .result-grade {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: inline-block;
+    padding: 18px 40px;
+    margin-bottom: 36px;
+    font-size: 1.1rem;
+  }
+  .grade-val { font-size: 2.6rem; font-weight: 700; color: var(--accent); }
+
+  .retry-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 48px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .retry-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+  /* SUBMIT BAR */
+  .submit-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(14,15,20,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .submit-info { color: var(--muted); font-size: 0.9rem; }
+  .submit-info strong { color: var(--text); }
+  .submit-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .submit-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  .q-card { animation: fadeIn 0.3s ease backwards; }
+
+  /* Responsive */
+  @media(max-width:580px) {
+    .header { padding: 18px 16px 14px; gap: 12px; }
+    .main { padding: 24px 14px 80px; }
+    .q-header, .options { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Ingliz <span>Tili</span> Testi</div>
+  <div class="progress-wrap">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 198</div>
+  </div>
+  <div class="score-badge" id="scoreBadge">✓ 0 &nbsp;✗ 0</div>
+</div>
+
+<div class="main" id="quiz-main">
+  <!-- Questions injected by JS -->
+</div>
+
+<div id="result-screen">
+  <div class="result-emoji" id="resultEmoji"></div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-sub" id="resultSub"></div>
+  <div class="result-stats">
+    <div class="stat-box">
+      <div class="stat-num correct" id="resCorrect">0</div>
+      <div class="stat-label">To'g'ri javoblar</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num wrong" id="resWrong">0</div>
+      <div class="stat-label">Noto'g'ri javoblar</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num pct" id="resPct">0%</div>
+      <div class="stat-label">Foiz</div>
+    </div>
+  </div>
+  <div class="result-grade">
+    Baho: <span class="grade-val" id="resGrade"></span>
+  </div>
+  <br>
+  <button class="retry-btn" onclick="restartQuiz()">🔄 Qaytadan boshlash</button>
+</div>
+
+<div class="submit-bar" id="submitBar">
+  <div class="submit-info">Javob berilgan: <strong id="answeredCount">0</strong> / 198</div>
+  <button class="submit-btn" id="submitBtn" onclick="submitQuiz()">Natijani ko'rish</button>
+</div>
+
+<script>
+const QUESTIONS = [{"question": "There isn’t … in the room.", "options": [{"text": "some", "correct": false}, {"text": "every", "correct": false}, {"text": "anybody", "correct": true}, {"text": "nothing", "correct": false}], "correct": "anybody"}, {"question": "Choose the correct answer.\nA conductor is a person who_____.", "options": [{"text": "cooks food", "correct": false}, {"text": "draws pictures", "correct": false}, {"text": "leads the orchestra", "correct": true}, {"text": "sells tickets", "correct": false}], "correct": "leads the orchestra"}, {"question": "Choose the correct answer\nMusicians usually practice in the_____.", "options": [{"text": "garden", "correct": false}, {"text": "shop", "correct": false}, {"text": "kitchen", "correct": false}, {"text": "studio", "correct": true}], "correct": "studio"}, {"question": "Choose the correct answer.\nShe can play the piano, but she ____ the violin.", "options": [{"text": "is singing", "correct": false}, {"text": "can't play", "correct": true}, {"text": "is watching", "correct": false}, {"text": "can drive", "correct": false}], "correct": "can't play"}, {"question": "Choose the correct answer\nThe concert starts at 7 p.m, so we need to arrive ____.", "options": [{"text": "Early", "correct": true}, {"text": "Noisy", "correct": false}, {"text": "Slow", "correct": false}, {"text": "Late", "correct": false}], "correct": "Early"}, {"question": "Choose the correct answer\nA song usually has____.", "options": [{"text": "Windows", "correct": false}, {"text": "Lyrics", "correct": true}, {"text": "Streets", "correct": false}, {"text": "Chairs", "correct": false}], "correct": "Lyrics"}, {"question": "Choose the correct answer.\nHe is listening ___ classical music.", "options": [{"text": "from", "correct": false}, {"text": "for", "correct": false}, {"text": "to", "correct": true}, {"text": "by", "correct": false}], "correct": "to"}, {"question": "Choose the correct answer.\nThe students have a music lesson ____ Monday.", "options": [{"text": "in", "correct": false}, {"text": "on", "correct": true}, {"text": "under", "correct": false}, {"text": "between", "correct": false}], "correct": "on"}, {"question": "Choose the correct answer.\nMany people _____the singer’s concerts", "options": [{"text": "go to", "correct": true}, {"text": "sleep in", "correct": false}, {"text": "pay for", "correct": false}, {"text": "write", "correct": false}], "correct": "go to"}, {"question": "Choose the correct answer.\nA guitar has____.", "options": [{"text": "glasses", "correct": false}, {"text": "wheels", "correct": false}, {"text": "strings", "correct": true}, {"text": "bottles", "correct": false}], "correct": "strings"}, {"question": "Choose the correct answer.\nThey are practicing a new song because they have a concert _____week.", "options": [{"text": "last", "correct": false}, {"text": "next", "correct": true}, {"text": "before", "correct": false}, {"text": "across", "correct": false}], "correct": "next"}, {"question": "Choose the thing that is NOT important for a good first impression?", "options": [{"text": "find things in common", "correct": false}, {"text": "ask questions", "correct": true}, {"text": "make eye contact", "correct": false}, {"text": "go to a party", "correct": false}], "correct": "ask questions"}, {"question": "Complete the sentence with  the correct preposition.\nI agree ___ your opinion about learning music", "options": [{"text": "at", "correct": false}, {"text": "on", "correct": false}, {"text": "with", "correct": true}, {"text": "to", "correct": false}], "correct": "with"}, {"question": "I live far ____ the music school, so I take the bus every day.", "options": [{"text": "to", "correct": false}, {"text": "from", "correct": true}, {"text": "at", "correct": false}, {"text": "on", "correct": false}], "correct": "from"}, {"question": "Choose the correct word to complete each sentence.\nMy______ is small. I have one sister.", "options": [{"text": "neighbor", "correct": false}, {"text": "family", "correct": true}, {"text": "partner", "correct": false}, {"text": "relationship", "correct": false}], "correct": "family"}, {"question": "Choose the correct word to complete each sentence\nI work or go to school for a big ________ of the week. I have only one free day.", "options": [{"text": "member", "correct": false}, {"text": "part", "correct": true}, {"text": "life", "correct": false}, {"text": "draw", "correct": false}], "correct": "part"}, {"question": "Choose the correct word to complete each sentence\nI_____ my words before I speak.", "options": [{"text": "family", "correct": false}, {"text": "am close ( to)", "correct": false}, {"text": "think about", "correct": true}, {"text": "partner", "correct": false}], "correct": "think about"}, {"question": "Choose the correct word to complete each sentence\nI have a good _______ with everyone", "options": [{"text": "life", "correct": false}, {"text": "draw", "correct": false}, {"text": "family", "correct": false}, {"text": "relationship", "correct": true}], "correct": "relationship"}, {"question": "Choose the correct word to complete each sentence\nI am_______ to my brother.  I tell him everything.", "options": [{"text": "close", "correct": true}, {"text": "relationship", "correct": false}, {"text": "life", "correct": false}, {"text": "neighbor", "correct": false}], "correct": "close"}, {"question": "Choose the correct word to complete each sentence\nThe ____ of my class are from all over the world.", "options": [{"text": "neighbor", "correct": false}, {"text": "members", "correct": true}, {"text": "partner", "correct": false}, {"text": "family", "correct": false}], "correct": "members"}, {"question": "Complete the sentence with the simple present of the verbs.\nI have three roommates.  We ___ some things together and things alone. Omar ___in his room.", "options": [{"text": "do/reads", "correct": true}, {"text": "does/reads", "correct": false}, {"text": "don’t/read", "correct": false}, {"text": "Do/read", "correct": false}], "correct": "do/reads"}, {"question": "Choose the correct personal or possessive pronoun to complete each sentence.\nThe is my brother. _____ name is Alex", "options": [{"text": "his", "correct": true}, {"text": "he", "correct": false}, {"text": "him", "correct": false}, {"text": "her", "correct": false}], "correct": "his"}, {"question": "Choose the correct personal or possessive pronoun to complete each sentence\nI have a friend.  ____ phone number is very easy to remember.", "options": [{"text": "him", "correct": false}, {"text": "he", "correct": false}, {"text": "his", "correct": true}, {"text": "she", "correct": false}], "correct": "his"}, {"question": "Choose the correct personal or possessive pronoun to complete each sentence.\nThis is my sister.  I love ____ very much", "options": [{"text": "she", "correct": false}, {"text": "her", "correct": true}, {"text": "him", "correct": false}, {"text": "his", "correct": false}], "correct": "her"}, {"question": "Choose the correct personal or possessive pronoun to complete each sentence\nWe have a neighbor. ____house is next to ours.", "options": [{"text": "they", "correct": false}, {"text": "their", "correct": true}, {"text": "them", "correct": false}, {"text": "it", "correct": false}], "correct": "their"}, {"question": "Choose the correct personal or possessive pronoun to complete each sentence.\nMy father is a teacher.  I like ______ because he is very kind.", "options": [{"text": "his", "correct": false}, {"text": "him", "correct": true}, {"text": "her", "correct": false}, {"text": "he", "correct": false}], "correct": "him"}, {"question": "Choose the correct pronoun(s) to complete each sentence\nThis is my brother. ______ is very tall, and ____ favorite color is blue", "options": [{"text": "He/ his", "correct": true}, {"text": "Him/ his", "correct": false}, {"text": "His/he", "correct": false}, {"text": "He/him", "correct": false}], "correct": "He/ his"}, {"question": "Choose the correct pronoun (s) to complete each sentence\nI have a friend. ____ is very kind , and I like ___ ideas.", "options": [{"text": "She/her", "correct": true}, {"text": "Her/her", "correct": false}, {"text": "She/she", "correct": false}, {"text": "Her/she", "correct": false}], "correct": "She/her"}, {"question": "Choose the correct pronoun(s)  to complete each sentence\nWe have a neighbor. _____ is very friendly,  and____ dog always plays in the garden.", "options": [{"text": "Him/his", "correct": false}, {"text": "He/his", "correct": true}, {"text": "He /him", "correct": false}, {"text": "His/ he", "correct": false}], "correct": "He/his"}, {"question": "Choose the correct pronoun (s) to complete each sentence\nMy mother loves cooking. _____ prepares delicious meals, and _____ recipes are very easy to follow.", "options": [{"text": "Her/hers", "correct": false}, {"text": "Her/her", "correct": false}, {"text": "She/she", "correct": false}, {"text": "She/her", "correct": true}], "correct": "She/her"}, {"question": "Choose the correct pronoun (s) to complete each sentence.\nMy father is a doctor. ______ works in a hospital, and ______ patients like him very much", "options": [{"text": "He/his", "correct": true}, {"text": "Him/his", "correct": false}, {"text": "He/him", "correct": false}, {"text": "His/he", "correct": false}], "correct": "He/his"}, {"question": "Present simple-Choose the Correct Verbs\nShe ______ coffee and always ____it in the morning", "options": [{"text": "likes/ drinks", "correct": true}, {"text": "Like / drink", "correct": false}, {"text": "Liking  / drink", "correct": false}, {"text": "Likes / drink", "correct": false}], "correct": "likes/ drinks"}, {"question": "Present Simple- Choose the Correct Verbs\nI____ English and _____ speaking every day.", "options": [{"text": "studies/practices", "correct": false}, {"text": "study / practice", "correct": true}, {"text": "studying/ practice", "correct": false}, {"text": "study/ practices", "correct": false}], "correct": "study / practice"}, {"question": "Present simple-Choose the Correct Verbs\nMy brother ______ TV and ______ video games after school.", "options": [{"text": "watches / plays", "correct": true}, {"text": "watch / play", "correct": false}, {"text": "watching / plays", "correct": false}, {"text": "watches / play", "correct": false}], "correct": "watches / plays"}, {"question": "Present simple-Choose the Correct Verbs\nWe ______ to the park and ______ the ducks on Sundays.", "options": [{"text": "go / feed", "correct": true}, {"text": "goes / feeds", "correct": false}, {"text": "going / feeds", "correct": false}, {"text": "go / feeds", "correct": false}], "correct": "go / feed"}, {"question": "Present simple-Choose the Correct Verbs\nHe ______ books and ______ notes in his notebook.", "options": [{"text": "reads / writes", "correct": true}, {"text": "read / write", "correct": false}, {"text": "reading / writes", "correct": false}, {"text": "reads / write", "correct": false}], "correct": "reads / writes"}, {"question": "Present simple-Choose the Correct Verbs.\nThey ______ football and ______ hard every weekend.", "options": [{"text": "play / trains", "correct": false}, {"text": "plays / trains", "correct": false}, {"text": "playing / train", "correct": false}, {"text": "play / train", "correct": true}], "correct": "play / train"}, {"question": "Present simple-Choose the Correct Verbs\nThe teacher ______ the lesson and ______ students’ questions.", "options": [{"text": "explaining / answers", "correct": false}, {"text": "explain / answer", "correct": false}, {"text": "explains / answers", "correct": true}, {"text": "explains / answer", "correct": false}], "correct": "explains / answers"}, {"question": "Present simple-Choose the correct Verbs\nMy mother ______ dinner and ______ the kitchen in the evening.", "options": [{"text": "cook / clean", "correct": false}, {"text": "cooks / cleans", "correct": true}, {"text": "cooking / cleans", "correct": false}, {"text": "cooks / clean", "correct": false}], "correct": "cooks / cleans"}, {"question": "Present simple-Choose the Correct Verbs.\nThe birds ______, and the sun ______ warm on my face.", "options": [{"text": "sings / feels", "correct": false}, {"text": "sings / feel", "correct": false}, {"text": "sing / feels", "correct": true}, {"text": "sing / feel", "correct": false}], "correct": "sing / feels"}, {"question": "Complete the sentence with the simple present negative of the verb.\nHe ______ his clothes on the floor", "options": [{"text": "do not leave", "correct": false}, {"text": "does not leave", "correct": true}, {"text": "does not leaves", "correct": false}, {"text": "doesn’t leaves", "correct": false}], "correct": "does not leave"}, {"question": "Complete the sentence with the simple present negative of the verb.\nShe ______ noise at night.", "options": [{"text": "does not makes", "correct": false}, {"text": "do not make", "correct": false}, {"text": "does not make", "correct": true}, {"text": "doesn’t do", "correct": false}], "correct": "does not make"}, {"question": "Complete the sentence with the simple present negative of the verb.\nMy roommate ______ me when I study.", "options": [{"text": "does not disturb", "correct": true}, {"text": "do not disturb", "correct": false}, {"text": "does not disturbs", "correct": false}, {"text": "doesn’t disturbing", "correct": false}], "correct": "does not disturb"}, {"question": "Complete the sentence with the simple present negative of the verb.\nThey ______ make a mess in the room.", "options": [{"text": "do not", "correct": true}, {"text": "does not", "correct": false}, {"text": "do not makes", "correct": false}, {"text": "doesn’t make", "correct": false}], "correct": "do not"}, {"question": "Complete the sentence with the simple present negative of the verb.\nMy friend and I ______ have problems living together.", "options": [{"text": "do not", "correct": true}, {"text": "does not", "correct": false}, {"text": "do not has", "correct": false}, {"text": "doesn’t has", "correct": false}], "correct": "do not"}, {"question": "Select the correct answer.\nLola and I ___ good friends.", "options": [{"text": "Is", "correct": false}, {"text": "Am", "correct": false}, {"text": "are", "correct": true}, {"text": "don’t", "correct": false}], "correct": "are"}, {"question": "Select the correct answer.\n___ your brother play football?", "options": [{"text": "do", "correct": false}, {"text": "Is", "correct": false}, {"text": "does", "correct": true}, {"text": "Don’t", "correct": false}], "correct": "does"}, {"question": "Select the correct answer.\nMy parents ___ at home today.", "options": [{"text": "don’t", "correct": false}, {"text": "are not", "correct": true}, {"text": "doesn’t", "correct": false}, {"text": "is", "correct": false}], "correct": "are not"}, {"question": "Choose the Correct Word Order.\nMy brother ___ late for school.", "options": [{"text": "is usual", "correct": false}, {"text": "always is", "correct": false}, {"text": "is always", "correct": true}, {"text": "as always", "correct": false}], "correct": "is always"}, {"question": "Choose the Correct Word Order\nShe ___ watches TV in the morning", "options": [{"text": "is never", "correct": false}, {"text": "never", "correct": true}, {"text": "doesn’t watches", "correct": false}, {"text": "watches never", "correct": false}], "correct": "never"}, {"question": "Choose the Correct Word Order\nShe _______ at home in the evening.", "options": [{"text": "is rarely", "correct": true}, {"text": "does not rarely", "correct": false}, {"text": "has", "correct": false}, {"text": "rarely is", "correct": false}], "correct": "is rarely"}, {"question": "Find the Correct Reason.\nI walk every day ________", "options": [{"text": "because it is useful and keeps me energetic.", "correct": true}, {"text": "because walking maybe good sometimes if I feel like it.", "correct": false}, {"text": "because it is something I try to do once in a while.", "correct": false}, {"text": "because I want to be fit but I usually forget.", "correct": false}], "correct": "because it is useful and keeps me energetic."}, {"question": "Find the Correct Reason.\nShe studies English in the evening ___", "options": [{"text": "because it might help but usually she watches TV.", "correct": false}, {"text": "because learning English can be fun if she has time.", "correct": false}, {"text": "because she sometimes studies when she remembers her books.", "correct": false}, {"text": "because it improves her skills and prepares her for exams", "correct": true}], "correct": "because it improves her skills and prepares her for exams"}, {"question": "Complete the sentence with the correct Prepositions.\nI usually wake up ___ 7 a.m. ___ weekdays", "options": [{"text": "in / on", "correct": false}, {"text": "at / on", "correct": true}, {"text": "at / in", "correct": false}, {"text": "on / at", "correct": false}], "correct": "at / on"}, {"question": "Complete the sentence with the correct Prepositions.\nMy birthday is ___ March ___ 15th.", "options": [{"text": "in / on", "correct": false}, {"text": "at / on", "correct": false}, {"text": "in / on", "correct": true}, {"text": "on / in", "correct": false}], "correct": "in / on"}, {"question": "Complete the sentence with the correct Prepositions.\nWe have a meeting ___ Monday ___ 3 p.m.", "options": [{"text": "on / at", "correct": true}, {"text": "in / at", "correct": false}, {"text": "at / on", "correct": false}, {"text": "on / in", "correct": false}], "correct": "on / at"}, {"question": "Complete the sentence with the correct Prepositions.\nShe was born ___ 1995 ___ June ___ 10th.", "options": [{"text": "in / in / on", "correct": true}, {"text": "at / on / in", "correct": false}, {"text": "in / on / at", "correct": false}, {"text": "on / in / at", "correct": false}], "correct": "in / in / on"}, {"question": "Complete the sentence with the correct Prepositions.\nThe kids play football ___ the park ___ Sunday morning.", "options": [{"text": "in / on", "correct": true}, {"text": "at / on", "correct": false}, {"text": "on / in", "correct": false}, {"text": "in / at", "correct": false}], "correct": "in / on"}, {"question": "Complete the sentence with the correct prepositions.\nWe met ___ the cinema ___ 7 p.m. ___ Friday.", "options": [{"text": "at / at / on", "correct": true}, {"text": "in / at / on", "correct": false}, {"text": "at / on / in", "correct": false}, {"text": "in / on / at", "correct": false}], "correct": "at / at / on"}, {"question": "Complete the sentence with the correct prepositions\nI usually go to bed ___ midnight ___ weekends.", "options": [{"text": "on / at", "correct": false}, {"text": "in / at", "correct": false}, {"text": "at / on", "correct": true}, {"text": "at / in", "correct": false}], "correct": "at / on"}, {"question": "Complete the sentence with the correct prepositions\nThey have a picnic ___ the garden ___ the afternoon.", "options": [{"text": "on / in", "correct": false}, {"text": "at / on", "correct": false}, {"text": "in / in", "correct": true}, {"text": "in / on", "correct": false}], "correct": "in / in"}, {"question": "Complete the sentence with the correct prepositions\nMy parents got married ___ 1980 ___ May ___ 20th.", "options": [{"text": "in / on / at", "correct": false}, {"text": "at / on / in", "correct": false}, {"text": "on / in / at", "correct": false}, {"text": "in / in / on", "correct": true}], "correct": "in / in / on"}, {"question": "Complete the sentence with the correct  prepositions\nThe meeting is ___ Monday ___ 10 a.m. ___ the office.", "options": [{"text": "on / at / in", "correct": true}, {"text": "in / at / on", "correct": false}, {"text": "at / in / on", "correct": false}, {"text": "on / in / at", "correct": false}], "correct": "on / at / in"}, {"question": "Verb + Infinitive or Gerund? I want ___ a new language this year.", "options": [{"text": "learning", "correct": false}, {"text": "to  learn", "correct": true}, {"text": "learn", "correct": false}, {"text": "learns", "correct": false}], "correct": "to  learn"}, {"question": "Verb + Infinitive or Gerund? She avoids ___ too much sugar.", "options": [{"text": "to eat", "correct": false}, {"text": "eating", "correct": true}, {"text": "eat", "correct": false}, {"text": "eats", "correct": false}], "correct": "eating"}, {"question": "Verb + Infinitive or Gerund?\nShe is trying to ___ how to play the guitar.", "options": [{"text": "Learned", "correct": false}, {"text": "Learning", "correct": false}, {"text": "Learns", "correct": false}, {"text": "learn", "correct": true}], "correct": "learn"}, {"question": "Choose the correct Meaning of the word “diary”\nShe writes in her diary every day.", "options": [{"text": "A calendar with international holidays", "correct": false}, {"text": "A book where you write your daily thoughts and Experience", "correct": true}, {"text": "A small notebook for shopping lists", "correct": false}, {"text": "A textbook for school subjects", "correct": false}], "correct": "A book where you write your daily thoughts and Experience"}, {"question": "Choose the correct meaning of the word “instead.”\nI don’t drink coffee. I drink tea instead.", "options": [{"text": "again and again", "correct": false}, {"text": "at the same time", "correct": false}, {"text": "in place of something or someone.", "correct": true}, {"text": "with other people", "correct": false}], "correct": "in place of something or someone."}, {"question": "Choose the correct meaning of the word “habit.”\nShe wakes up early and it is her habit.", "options": [{"text": "a special event that happens once", "correct": false}, {"text": "something you do regularly; a usual behavior", "correct": true}, {"text": "a hobby you do only on weekends", "correct": false}, {"text": "a rule made by someone else", "correct": false}], "correct": "something you do regularly; a usual behavior"}, {"question": "Choose the correct meaning of the word “track.”\nI track my sleep.", "options": [{"text": "to lose something", "correct": false}, {"text": "to forget something", "correct": false}, {"text": "to  record something", "correct": true}, {"text": "to hide something", "correct": false}], "correct": "to  record something"}, {"question": "Choose the correct word to complete the dialogue.\nA: Do you eat breakfast with your family?\nB: No, we don’t.\nA: Oh, really?\nB: Yes. The only ___________ we eat together is dinner.", "options": [{"text": "delicious", "correct": false}, {"text": "restaurant", "correct": false}, {"text": "special", "correct": false}, {"text": "meal", "correct": true}], "correct": "meal"}, {"question": "Choose the correct words to complete the dialogue.\nA: Do you do something ______ for your birthday?\nB: My mother always makes a cake, but she tries a new ____ every year.", "options": [{"text": "meal / delicious", "correct": false}, {"text": "special / delicious", "correct": false}, {"text": "dessert / special", "correct": false}, {"text": "special / recipe", "correct": true}], "correct": "special / recipe"}, {"question": "Choose the correct meaning of the word.\n“Men xafaman.”", "options": [{"text": "sad", "correct": true}, {"text": "happy", "correct": false}, {"text": "angry === bad", "correct": false}], "correct": "sad"}, {"question": "Choose the correct word to complete the sentence.\nI love chocolate because it is very ______.", "options": [{"text": "Sweet", "correct": true}, {"text": "Salty", "correct": false}, {"text": "Spicy", "correct": false}, {"text": "Healthier", "correct": false}], "correct": "Sweet"}, {"question": "Choose the correct word to complete the sentence.\nIndian food is often very ______.", "options": [{"text": "Spicy", "correct": true}, {"text": "Sweet", "correct": false}, {"text": "Salty", "correct": false}, {"text": "Healthy", "correct": false}], "correct": "Spicy"}, {"question": "Choose the correct word to complete the sentence.\nVegetables and fruits are very ______ for you.", "options": [{"text": "Spicy", "correct": false}, {"text": "Sweet", "correct": false}, {"text": "Healthy", "correct": true}, {"text": "Salty", "correct": false}], "correct": "Healthy"}, {"question": "Complete the sentence with the correct word.\nI usually _______ my homework after dinner.", "options": [{"text": "Go", "correct": false}, {"text": "Make", "correct": false}, {"text": "Do", "correct": true}, {"text": "Take", "correct": false}], "correct": "Do"}, {"question": "Choose the correct sentence:", "options": [{"text": "She goes to school every day.", "correct": true}, {"text": "She go to school every day.", "correct": false}, {"text": "She going to school every day.", "correct": false}, {"text": "She gone to school every day.", "correct": false}], "correct": "She goes to school every day."}, {"question": "Read the short text and answer the question:\n\"Tom likes sports. He plays football on Saturdays and swims on Sundays.\"\nQuestion: What does Tom do on Sundays?", "options": [{"text": "He sleeps.", "correct": false}, {"text": "He plays football.", "correct": false}, {"text": "He study", "correct": false}, {"text": "He Swims", "correct": true}], "correct": "He Swims"}, {"question": "Choose the correct sentence:", "options": [{"text": "I reading a book now.", "correct": false}, {"text": "I am reading a book now.", "correct": true}, {"text": "I reads a book now.", "correct": false}, {"text": "I read a book now.", "correct": false}], "correct": "I am reading a book now."}, {"question": "Choose the correct word:\n\"I always eat _______ in the morning.\"", "options": [{"text": "Dinner", "correct": false}, {"text": "Lunch", "correct": false}, {"text": "Breakfast", "correct": true}, {"text": "Juice", "correct": false}], "correct": "Breakfast"}, {"question": "Choose the correct response\nYour friend says: \"Do you like pizza?\"", "options": [{"text": "Yes, I Do.", "correct": true}, {"text": "No, I am.", "correct": false}, {"text": "I can", "correct": false}, {"text": "Yes, I am.", "correct": false}], "correct": "Yes, I Do."}, {"question": "Read the text:\n\"Sara goes to the park every evening. She likes to walk and watch the birds.\"\nQuestion: What does Sara like to do in the park?", "options": [{"text": "Walk and Watch birds", "correct": true}, {"text": "Run and play", "correct": false}, {"text": "Sleep", "correct": false}, {"text": "Eat", "correct": false}], "correct": "Walk and Watch birds"}, {"question": "Choose the correct question for the answer: \"Yes, I play football every Saturday.\"", "options": [{"text": "You do play football on Saturdays”", "correct": false}, {"text": "Are you play football on Saturdays?", "correct": false}, {"text": "Do you play football on Saturdays?", "correct": true}, {"text": "Do you plays football on Saturdays?", "correct": false}], "correct": "Do you play football on Saturdays?"}, {"question": "Grammar – Past Simple\n\"Yesterday, I _______ to the museum.\"", "options": [{"text": "Goes", "correct": false}, {"text": "Go", "correct": false}, {"text": "Going", "correct": false}, {"text": "Went", "correct": true}], "correct": "Went"}, {"question": "Reading Comprehension\n\"Long ago, people used horses and carts to travel. They didn’t have cars or planes.\"\nQuestion: How did people travel long ago?", "options": [{"text": "By car", "correct": false}, {"text": "By plane", "correct": false}, {"text": "By horse and cart", "correct": true}, {"text": "By bike", "correct": false}], "correct": "By horse and cart"}, {"question": "\"In the past, people wrote letters instead of emails.\"\nQuestion: What did people use instead of emails?", "options": [{"text": "letters", "correct": true}, {"text": "Phones", "correct": false}, {"text": "Messages", "correct": false}, {"text": "Computers", "correct": false}], "correct": "letters"}, {"question": "Grammar – Past Simple vs Present Simple.\n\"Today, I watch TV. Yesterday, I _______ TV.\"", "options": [{"text": "Watched", "correct": true}, {"text": "Watch", "correct": false}, {"text": "Watching", "correct": false}, {"text": "Watches", "correct": false}], "correct": "Watched"}, {"question": "Vocabulary – Multiple Choice\n\"A long time ago, people used _______ to light their homes.\"", "options": [{"text": "Candles", "correct": true}, {"text": "Electricity", "correct": false}, {"text": "Lamps", "correct": false}, {"text": "All of the above", "correct": false}], "correct": "Candles"}, {"question": "Choose the correct response\nYour friend asks: \"Did people have mobile phones 100 years ago?\"", "options": [{"text": "No, they didn’t.", "correct": true}, {"text": "Yes, they did.", "correct": false}, {"text": "Yes, they are.", "correct": false}, {"text": "No, they aren’t.", "correct": false}], "correct": "No, they didn’t."}, {"question": "\"People in ancient times wore different clothes. They didn’t have jeans or T-shirts.\"\nQuestion: What kind of clothes did ancient people NOT have?", "options": [{"text": "Dresses", "correct": false}, {"text": "Jeans", "correct": true}, {"text": "Robes", "correct": false}, {"text": "Cloaks", "correct": false}], "correct": "Jeans"}, {"question": "Choose the correct question for the answer: \"Yes, I visited the castle last summer.\"", "options": [{"text": "You visited the castle last summer?", "correct": false}, {"text": "Do you visit the castle last summer?", "correct": false}, {"text": "Did you visit the castle last summer?", "correct": true}, {"text": "Did she visited the castle last summer?", "correct": false}], "correct": "Did you visit the castle last summer?"}, {"question": "Choose the correct answer to complete the sentence.\nShe _____ a uniform.", "options": [{"text": "to wear", "correct": false}, {"text": "wears", "correct": true}, {"text": "wearing", "correct": false}, {"text": "wear", "correct": false}], "correct": "wears"}, {"question": "Choose the correct answer to complete the sentence.\nHe _____ his car every weekend.", "options": [{"text": "Washed", "correct": false}, {"text": "Washing", "correct": false}, {"text": "Washes", "correct": true}, {"text": "Wash", "correct": false}], "correct": "Washes"}, {"question": "Rosemary _____ three languages.", "options": [{"text": "Spoken", "correct": false}, {"text": "Tells", "correct": false}, {"text": "Tell", "correct": false}, {"text": "Speaks", "correct": true}], "correct": "Speaks"}, {"question": "Choose the correct answer to complete the sentence.\nJim’s a postman. He _____ letters to people.", "options": [{"text": "Delivers", "correct": true}, {"text": "Serves", "correct": false}, {"text": "Works", "correct": false}, {"text": "Answers", "correct": false}], "correct": "Delivers"}, {"question": "Bern _____ in a flat in Birmingham.", "options": [{"text": "Lives", "correct": true}, {"text": "Stands", "correct": false}, {"text": "Has", "correct": false}, {"text": "Wants", "correct": false}], "correct": "Lives"}, {"question": "Choose the correct answer to complete the sentence.\n_____ sells things.", "options": [{"text": "A doctor", "correct": false}, {"text": "A shopkeeper", "correct": true}, {"text": "A nurse", "correct": false}, {"text": "A postman", "correct": false}], "correct": "A shopkeeper"}, {"question": "Translate into English and find preposition of place?\n”Orasida”", "options": [{"text": "belong", "correct": false}, {"text": "at the bottom", "correct": false}, {"text": "Between", "correct": true}, {"text": "from", "correct": false}], "correct": "Between"}, {"question": "Translate into English and find preposition of place?\n”ustida”", "options": [{"text": "From", "correct": false}, {"text": "Belong", "correct": false}, {"text": "At the bottom", "correct": false}, {"text": "On", "correct": true}], "correct": "On"}, {"question": "Translate into English and find preposition of place?\n”ichida”", "options": [{"text": "In", "correct": true}, {"text": "Belong", "correct": false}, {"text": "From", "correct": false}, {"text": "At the bottom", "correct": false}], "correct": "In"}, {"question": "Translate into English and find preposition of place?\n”yonida”", "options": [{"text": "Next to", "correct": true}, {"text": "From", "correct": false}, {"text": "Belong", "correct": false}, {"text": "At the bottom", "correct": false}], "correct": "Next to"}, {"question": "Translate into English and find preposition of place?\n”qarshida”", "options": [{"text": "Opposite", "correct": true}, {"text": "From", "correct": false}, {"text": "Belong", "correct": false}, {"text": "At the bottom", "correct": false}], "correct": "Opposite"}, {"question": "Translate into English and find preposition of place?\n”tepasida”", "options": [{"text": "at the bottom", "correct": false}, {"text": "from", "correct": false}, {"text": "above", "correct": true}, {"text": "belong", "correct": false}], "correct": "above"}, {"question": "Translate into English and find preposition of place?\n”tagida”", "options": [{"text": "From", "correct": false}, {"text": "Under", "correct": true}, {"text": "Belong", "correct": false}, {"text": "Next to", "correct": false}], "correct": "Under"}, {"question": "Choose the correct past simple form", "options": [{"text": "I was visit my grandparents yesterday.", "correct": false}, {"text": "I visit my grandparents yesterday.", "correct": false}, {"text": "I am visiting my grandparents yesterday.", "correct": false}, {"text": "I visited my grandparents yesterday.", "correct": true}], "correct": "I visited my grandparents yesterday."}, {"question": "Choose the correct past simple form", "options": [{"text": "She is cooking dinner last night.", "correct": false}, {"text": "She cooks dinner last night.", "correct": false}, {"text": "She cooked dinner last night.", "correct": true}, {"text": "She cook dinner last night.", "correct": false}], "correct": "She cooked dinner last night."}, {"question": "Choose the correct past simple form", "options": [{"text": "They play football on Sunday.", "correct": false}, {"text": "They played football on Sunday.", "correct": true}, {"text": "They are playing football on Sunday.", "correct": false}, {"text": "They plays football on Sunday.", "correct": false}], "correct": "They played football on Sunday."}, {"question": "Choose the correct past simple form", "options": [{"text": "We are watching a movie yesterday", "correct": false}, {"text": "We watch a movie yesterday.", "correct": false}, {"text": "We watched a movie yesterday.", "correct": true}, {"text": "We watches a movie yesterday.", "correct": false}], "correct": "We watched a movie yesterday."}, {"question": "Choose the correct past simple form", "options": [{"text": "He went to school early.", "correct": true}, {"text": "He go to school early.", "correct": false}, {"text": "He goes to school early.", "correct": false}, {"text": "He is going to school early.", "correct": false}], "correct": "He went to school early."}, {"question": "Choose the correct past simple form", "options": [{"text": "My parents traveled to Spain last year.", "correct": true}, {"text": "My parents travel to Spain last year.", "correct": false}, {"text": "My parents are traveling to Spain last year.", "correct": false}, {"text": "My parents travels to Spain last year.", "correct": false}], "correct": "My parents traveled to Spain last year."}, {"question": "Choose the correct past simple form", "options": [{"text": "I am buying a new phone.", "correct": false}, {"text": "I buy a new phone.", "correct": false}, {"text": "I bought a new phone.", "correct": true}, {"text": "I buys a new phone.", "correct": false}], "correct": "I bought a new phone."}, {"question": "Choose the correct past simple form", "options": [{"text": "The teacher explain the rule", "correct": false}, {"text": "The teacher explains the rule.", "correct": false}, {"text": "The teacher is explaining the rule.", "correct": false}, {"text": "The teacher explained the rule.", "correct": true}], "correct": "The teacher explained the rule."}, {"question": "Choose the correct past simple form", "options": [{"text": "She is studying English last week.", "correct": false}, {"text": "She studies English last week.", "correct": false}, {"text": "She studied English last week.", "correct": true}, {"text": "She study English last week.", "correct": false}], "correct": "She studied English last week."}, {"question": "Choose the correct past simple form", "options": [{"text": "We have lunch at 1 p.m.", "correct": false}, {"text": "We had lunch at 1 p.m.", "correct": true}, {"text": "We are having lunch at 1 p.m.", "correct": false}, {"text": "We has lunch at 1 p.m.", "correct": false}], "correct": "We had lunch at 1 p.m."}, {"question": "Choose the correct word to complete each sentence.\nWhen I meet new people, I always try to be __________ and smile a lot.", "options": [{"text": "friendly", "correct": true}, {"text": "goal", "correct": false}, {"text": "Idea", "correct": false}, {"text": "believe", "correct": false}], "correct": "friendly"}, {"question": "Choose the correct word to complete each sentence.\nMy main __________ in life is to become a successful psychologist.", "options": [{"text": "Idea", "correct": false}, {"text": "Far", "correct": false}, {"text": "Goal", "correct": true}, {"text": "Agree", "correct": false}], "correct": "Goal"}, {"question": "Choose the correct word to complete each sentence.\nI __________ psychology because it helps me understand people better.", "options": [{"text": "Friendly", "correct": false}, {"text": "Far", "correct": false}, {"text": "Agree", "correct": false}, {"text": "am interested in", "correct": true}], "correct": "am interested in"}, {"question": "Choose the correct word to complete each sentence.\nMy best friend lives very __________ from me, but we still talk every day.", "options": [{"text": "Far", "correct": true}, {"text": "Goal", "correct": false}, {"text": "Idea", "correct": false}, {"text": "Agree", "correct": false}], "correct": "Far"}, {"question": "Choose the correct word to complete each sentence.\nI completely __________ with the idea that confidence makes a good first impression", "options": [{"text": "believe", "correct": false}, {"text": "agree", "correct": true}, {"text": "free time", "correct": false}, {"text": "goal", "correct": false}], "correct": "agree"}, {"question": "Choose the correct word to complete each sentence.\nWhen young people go to university, they often __________ from their parents’ house.", "options": [{"text": "share", "correct": false}, {"text": "move into", "correct": false}, {"text": "move out", "correct": true}, {"text": "alone", "correct": false}], "correct": "move out"}, {"question": "Choose the correct word to complete each sentence.\nI don’t like living __________ because I enjoy having people around me.", "options": [{"text": "Alone", "correct": true}, {"text": "Space", "correct": false}, {"text": "During", "correct": false}, {"text": "Move out", "correct": false}], "correct": "Alone"}, {"question": "Choose the correct word to complete each sentence.\nMy new house is small but very __________ and bright.", "options": [{"text": "comfortable", "correct": true}, {"text": "share", "correct": false}, {"text": "move into", "correct": false}, {"text": "own", "correct": false}], "correct": "comfortable"}, {"question": "Choose the correct word to complete each sentence.\nWe have a big living room, so there’s a lot of __________ for parties and family dinners.", "options": [{"text": "Goal", "correct": false}, {"text": "Space", "correct": true}, {"text": "Idea", "correct": false}, {"text": "Alone", "correct": false}], "correct": "Space"}, {"question": "Choose the correct word to complete each sentence.\nI __________ my room __________ my younger brother because our house isn’t very big.", "options": [{"text": "agree / with", "correct": false}, {"text": "move / into", "correct": false}, {"text": "be / alone", "correct": false}, {"text": "share / with", "correct": true}], "correct": "share / with"}, {"question": "Choose the correct word to complete each sentence.\n__________ the weekends, I usually clean my room and decorate my home.", "options": [{"text": "Move into", "correct": false}, {"text": "Alone", "correct": false}, {"text": "During", "correct": true}, {"text": "Own", "correct": false}], "correct": "During"}, {"question": "Choose the correct sentence", "options": [{"text": "She have two sisters.", "correct": false}, {"text": "She has two sisters.", "correct": true}, {"text": "She has two sister.", "correct": false}, {"text": "She haves two sisters.", "correct": false}], "correct": "She has two sisters."}, {"question": "Choose the correct sentence", "options": [{"text": "He is tall and very friendly.", "correct": true}, {"text": "He are tall and very friendly.", "correct": false}, {"text": "He tall and very friendly.", "correct": false}, {"text": "He is tall very friendlier.", "correct": false}], "correct": "He is tall and very friendly."}, {"question": "Choose the correct sentence", "options": [{"text": "We usually eat dinner together.", "correct": true}, {"text": "We usually eats dinner together.", "correct": false}, {"text": "We usually eating dinner together.", "correct": false}, {"text": "We eat usually dinner together.", "correct": false}], "correct": "We usually eat dinner together."}, {"question": "Choose the correct sentence", "options": [{"text": "My mother is very kind.", "correct": true}, {"text": "My mother is very kindly.", "correct": false}, {"text": "My mother very kind.", "correct": false}, {"text": "My mother is very kindness.", "correct": false}], "correct": "My mother is very kind."}, {"question": "Choose the correct sentence", "options": [{"text": "“Help me can you please?”", "correct": false}, {"text": "“You help me, please.”", "correct": false}, {"text": "Can you help me, please?", "correct": true}, {"text": "I help you please.", "correct": false}], "correct": "Can you help me, please?"}, {"question": "Choose the correct sentence", "options": [{"text": "There be three rooms in my house.", "correct": false}, {"text": "There is three rooms in my house.", "correct": false}, {"text": "There are three room in my house.", "correct": false}, {"text": "There are three rooms in my house.", "correct": true}], "correct": "There are three rooms in my house."}, {"question": "Choose the correct sentence", "options": [{"text": "This is my family we close.", "correct": false}, {"text": "This my family. We very close.", "correct": false}, {"text": "This is my family. We are very close.", "correct": true}, {"text": "My family is this. Close we are.", "correct": false}], "correct": "This is my family. We are very close."}, {"question": "Choose the correct sentence", "options": [{"text": "There is some water in the bottle.", "correct": true}, {"text": "There is some waters in the bottle", "correct": false}, {"text": "There is a water in the bottle.", "correct": false}, {"text": "There are water in the bottle.", "correct": false}], "correct": "There is some water in the bottle."}, {"question": "Choose the correct sentence", "options": [{"text": "She loves cooking at home.", "correct": true}, {"text": "She love cooking at home.", "correct": false}, {"text": "She loving cooking at home.", "correct": false}, {"text": "She loves cook at home.", "correct": false}], "correct": "She loves cooking at home."}, {"question": "Choose the correct sentence", "options": [{"text": "There are a lot of people in the restaurant.", "correct": true}, {"text": "There is many people in the restaurant.", "correct": false}, {"text": "There are much people in the restaurant.", "correct": false}, {"text": "There is people a lot.", "correct": false}], "correct": "There are a lot of people in the restaurant."}, {"question": "Choose the correct sentence", "options": [{"text": "We Had dinner at a nice restaurant.", "correct": true}, {"text": "We have dinner at nice restaurant.", "correct": false}, {"text": "We dinner had at a nice restaurant.", "correct": false}, {"text": "We had a dinner at nice restaurant.", "correct": false}], "correct": "We Had dinner at a nice restaurant."}, {"question": "Choose the correct sentence", "options": [{"text": "My Hobby is drawing", "correct": true}, {"text": "My hobby are drawing.", "correct": false}, {"text": "My hobby drawing.", "correct": false}, {"text": "My hobby is draw.", "correct": false}], "correct": "My Hobby is drawing"}, {"question": "Choose the correct sentence", "options": [{"text": "Did You watch the movie?", "correct": true}, {"text": "Do you watched the movie?", "correct": false}, {"text": "Did you watched the movie?", "correct": false}, {"text": "You did watch the movie?", "correct": false}], "correct": "Did You watch the movie?"}, {"question": "Choose the correct sentence", "options": [{"text": "We had a picnic last Friday.", "correct": true}, {"text": "We had a picnic next Friday.", "correct": false}, {"text": "We have a picnic yesterday.", "correct": false}, {"text": "We picnic had last Friday.", "correct": false}], "correct": "We had a picnic last Friday."}, {"question": "Choose the correct sentence", "options": [{"text": "There is a big supermarket on this street.", "correct": true}, {"text": "There are a big supermarket on this street.", "correct": false}, {"text": "There is big supermarket on this street.", "correct": false}, {"text": "There are supermarket on this street.", "correct": false}], "correct": "There is a big supermarket on this street."}, {"question": "Choose the correct sentence", "options": [{"text": "How many apples are there?", "correct": true}, {"text": "How much apples are there?", "correct": false}, {"text": "How many apple is there?", "correct": false}, {"text": "How much apple are there?", "correct": false}], "correct": "How many apples are there?"}, {"question": "Choose the correct sentence.", "options": [{"text": "How much sugar do you need?", "correct": true}, {"text": "How many sugar do you need?", "correct": false}, {"text": "How many sugars do you need?", "correct": false}, {"text": "How much sugars do you need?", "correct": false}], "correct": "How much sugar do you need?"}, {"question": "Choose the correct word to complete the sentence.\nShe is __________ good at singing.", "options": [{"text": "Really", "correct": true}, {"text": "Real", "correct": false}, {"text": "Verily", "correct": false}, {"text": "True", "correct": false}], "correct": "Really"}, {"question": "Choose the correct word to complete the sentence.\n__________ you go to the concert last night?", "options": [{"text": "Did", "correct": true}, {"text": "Do", "correct": false}, {"text": "Does", "correct": false}, {"text": "Doing", "correct": false}], "correct": "Did"}, {"question": "She is from Russia.    ____  name is Svetlana.", "options": [{"text": "Her", "correct": true}, {"text": "his", "correct": false}, {"text": "my", "correct": false}, {"text": "Our", "correct": false}], "correct": "Her"}, {"question": "I’m  Japanese.  ____  parents are from Japan.\n= = = = = = =\nHer", "options": [{"text": "His", "correct": false}, {"text": "my", "correct": true}, {"text": "Our", "correct": false}], "correct": "my"}, {"question": "You are from Italy. ___ name is Mario.", "options": [{"text": "Your", "correct": true}, {"text": "His", "correct": false}, {"text": "my", "correct": false}, {"text": "Our", "correct": false}], "correct": "Your"}, {"question": "They are from Greece. _____ names are Costas and Kimis.", "options": [{"text": "Her", "correct": false}, {"text": "his", "correct": false}, {"text": "their", "correct": true}, {"text": "Our", "correct": false}], "correct": "their"}, {"question": "We are English. _____  parents are from London.", "options": [{"text": "Her", "correct": false}, {"text": "his", "correct": false}, {"text": "my", "correct": false}, {"text": "our", "correct": true}], "correct": "our"}, {"question": "He isn’t from China.   ____ family is from Vietnam.", "options": [{"text": "Her", "correct": false}, {"text": "his", "correct": true}, {"text": "My", "correct": false}, {"text": "our", "correct": false}], "correct": "his"}, {"question": "Choose the right word.  It’s ____ problem, not ____.", "options": [{"text": "Their / our", "correct": false}, {"text": "theirs/ ours", "correct": false}, {"text": "theirs/ our", "correct": false}, {"text": "their/ ours.", "correct": true}], "correct": "their/ ours."}, {"question": "This is a nice camera. Is it ____?", "options": [{"text": "You", "correct": false}, {"text": "your", "correct": false}, {"text": "yours", "correct": true}, {"text": "yous", "correct": false}], "correct": "yours"}, {"question": "Whose books are these?  ______ or  ______?", "options": [{"text": "Yours/mine", "correct": true}, {"text": "your/ mine", "correct": false}, {"text": "yours/ my", "correct": false}, {"text": "your/ my", "correct": false}], "correct": "Yours/mine"}, {"question": "Catherine is going out with   ____friends this evening.", "options": [{"text": "Her", "correct": true}, {"text": "Hers", "correct": false}, {"text": "It", "correct": false}, {"text": "ours", "correct": false}], "correct": "Her"}, {"question": "____ room is bigger than  ____.", "options": [{"text": "My / hers", "correct": true}, {"text": "mine/ her", "correct": false}, {"text": "my/ her", "correct": false}, {"text": "mine/ hers", "correct": false}], "correct": "My / hers"}, {"question": "They’ve got two children but I don’t know  ___ names.", "options": [{"text": "Their", "correct": true}, {"text": "They", "correct": false}, {"text": "Theirs", "correct": false}, {"text": "them", "correct": false}], "correct": "Their"}, {"question": "What is ___ name?    _____  name is Carlo. I’m from Italy.", "options": [{"text": "Your/ my", "correct": true}, {"text": "you/ my", "correct": false}, {"text": "Yours/ mine", "correct": false}, {"text": "you/ I", "correct": false}], "correct": "Your/ my"}, {"question": "Who are ___?  ____ are students?", "options": [{"text": "they/ they", "correct": true}, {"text": "their/ their", "correct": false}, {"text": "theirs /theirs", "correct": false}, {"text": "them /them", "correct": false}], "correct": "they/ they"}, {"question": "What are ___ names?  ____ names are Pablo and Maria.", "options": [{"text": "they/ they", "correct": false}, {"text": "their/ their", "correct": true}, {"text": "theirs /theirs", "correct": false}, {"text": "them /them", "correct": false}], "correct": "their/ their"}, {"question": "How old is Michael?  I think ___ is about 30.", "options": [{"text": "he", "correct": true}, {"text": "she", "correct": false}, {"text": "my", "correct": false}, {"text": "I", "correct": false}], "correct": "he"}, {"question": "Where is Maria from?  ____ is from Spain. ___  hometown is Madrid.", "options": [{"text": "she/ her", "correct": true}, {"text": "she/ she", "correct": false}, {"text": "her / her", "correct": false}, {"text": "her/she", "correct": false}], "correct": "she/ her"}, {"question": "The pencil belongs to the girl. It is ____.", "options": [{"text": "hers", "correct": true}, {"text": "Mine", "correct": false}, {"text": "Yours", "correct": false}, {"text": "His", "correct": false}], "correct": "hers"}, {"question": "My friends love reading. It is a favorite pastime of_____.", "options": [{"text": "theirs", "correct": true}, {"text": "Mine", "correct": false}, {"text": "Yours", "correct": false}, {"text": "His", "correct": false}], "correct": "theirs"}, {"question": "Her coat is prettier than mine. Her coat is blue. ______ is brown.", "options": [{"text": "Mine", "correct": true}, {"text": "Yours", "correct": false}, {"text": "His", "correct": false}, {"text": "Its", "correct": false}], "correct": "Mine"}, {"question": "Choose the antonym to the word “ hardworking”.", "options": [{"text": "lazy", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "lazy"}, {"question": "Choose the antonym to the word “ rude”.", "options": [{"text": "Polite", "correct": true}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}, {"text": "Lazy", "correct": false}], "correct": "Polite"}, {"question": "Choose the antonym to the word “ arrogant”.", "options": [{"text": "modest", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "modest"}, {"question": "Choose the antonym to the word “ productive”.", "options": [{"text": "slow", "correct": true}, {"text": "Polite", "correct": false}, {"text": "== Kind", "correct": false}, {"text": "Modest", "correct": false}], "correct": "slow"}, {"question": "Choose the antonym to the word “ decisive”.", "options": [{"text": "hesitant", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "hesitant"}, {"question": "Choose the antonym to the word “ careless”.", "options": [{"text": "thorough", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "thorough"}, {"question": "Choose the antonym to the word “ strict”.", "options": [{"text": "lenient", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "lenient"}, {"question": "Choose the antonym to the word “ outgoing”.", "options": [{"text": "reserved", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "reserved"}, {"question": "Choose the antonym to the word “ generous”.", "options": [{"text": "mean", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "mean"}, {"question": "Choose the antonym to the word “ relaxed”.", "options": [{"text": "tense", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "tense"}, {"question": "Choose the appropriate word.\nMy little sister doesn’t like to meet new people. She is very _____.", "options": [{"text": "shy", "correct": true}, {"text": "Curly", "correct": false}, {"text": "Lazy", "correct": false}, {"text": "Funny", "correct": false}], "correct": "shy"}, {"question": "She has a high I.Q. She’s very _____.", "options": [{"text": "intelligent", "correct": true}, {"text": "Curly", "correct": false}, {"text": "= Lazy", "correct": false}, {"text": "Funny", "correct": false}], "correct": "intelligent"}, {"question": "She has ______ , blond hair.", "options": [{"text": "long", "correct": true}, {"text": "shy", "correct": false}, {"text": "Lazy", "correct": false}, {"text": "Funny", "correct": false}], "correct": "long"}, {"question": "My classmate is very ____ . He loves to tell jokes in class.", "options": [{"text": "funny", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "funny"}, {"question": "I’m not short . I’m _____.", "options": [{"text": "tall", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "tall"}, {"question": "I lost 10 kilograms. Now I’m ____.", "options": [{"text": "thin", "correct": true}, {"text": "Polite", "correct": false}, {"text": "Kind", "correct": false}, {"text": "Slow", "correct": false}], "correct": "thin"}, {"question": "My mother is very beautiful and my father is _____.", "options": [{"text": "handsome", "correct": true}, {"text": "Curly", "correct": false}, {"text": "Lazy", "correct": false}, {"text": "Funny", "correct": false}], "correct": "handsome"}, {"question": "My uncle isn’t old , but  he is in his forties. He’s ____.", "options": [{"text": "middle-aged", "correct": true}, {"text": "Curly", "correct": false}, {"text": "Lazy", "correct": false}, {"text": "Funny", "correct": false}], "correct": "middle-aged"}, {"question": "Andy ______ the family car", "options": [{"text": "wash", "correct": false}, {"text": "washes", "correct": true}, {"text": "washs", "correct": false}, {"text": "washing", "correct": false}], "correct": "washes"}, {"question": "every morning my mother ____at 6 o'clock", "options": [{"text": "get up", "correct": false}, {"text": "gett", "correct": false}, {"text": "gets up", "correct": true}, {"text": "getting up", "correct": false}], "correct": "gets up"}, {"question": "Mr Black ______e-mails in the evenings", "options": [{"text": "write", "correct": false}, {"text": "writes", "correct": true}, {"text": "Writs", "correct": false}, {"text": "writing", "correct": false}], "correct": "writes"}, {"question": "the girls ___ the shopping", "options": [{"text": "do", "correct": true}, {"text": "does", "correct": false}, {"text": "doing", "correct": false}, {"text": "Dos", "correct": false}], "correct": "do"}, {"question": "Do you ___milk in your tea?", "options": [{"text": "like", "correct": true}, {"text": "Liks", "correct": false}, {"text": "likes", "correct": false}, {"text": "liking", "correct": false}], "correct": "like"}, {"question": "___I correct?", "options": [{"text": "are", "correct": false}, {"text": "be", "correct": false}, {"text": "is", "correct": false}, {"text": "am", "correct": true}], "correct": "am"}, {"question": "which sentence is in the Simple Present?", "options": [{"text": "he is reading a book", "correct": false}, {"text": "he read a book", "correct": false}, {"text": "he reads a book", "correct": true}, {"text": "he will read a book", "correct": false}], "correct": "he reads a book"}, {"question": "which negative sentence is in the Simple Present?", "options": [{"text": "we don't work in a bank", "correct": true}, {"text": "we doesn't work in a bank", "correct": false}, {"text": "we do'nt work in a bank", "correct": false}, {"text": "we are working in a bank", "correct": false}], "correct": "we don't work in a bank"}, {"question": "which verb forms are used in the Simple Present?", "options": [{"text": "infinitiv", "correct": false}, {"text": "infinitiv+-ed", "correct": false}, {"text": "infinitiv+-es,s", "correct": true}, {"text": "have+ed", "correct": false}], "correct": "infinitiv+-es,s"}, {"question": "which  verb forms are correct?", "options": [{"text": "she are", "correct": false}, {"text": "she have", "correct": false}, {"text": "she work", "correct": false}, {"text": "she plays", "correct": true}], "correct": "she plays"}, {"question": "which sentence/question is in the present simple?", "options": [{"text": "did you go to the park?", "correct": false}, {"text": "do you speak Spanish?", "correct": true}, {"text": "she didn't hepl her mother", "correct": false}, {"text": "we are reading a book", "correct": false}], "correct": "do you speak Spanish?"}, {"question": "what are typical signal words for the present simple?", "options": [{"text": "always, oftem, now", "correct": false}, {"text": "very day, often, testerday", "correct": false}, {"text": "every year, often, always", "correct": true}, {"text": "now, yesterday, at the moment", "correct": false}], "correct": "every year, often, always"}, {"question": "We live in a nice house but ____neighbours are horrible!", "options": [{"text": "us", "correct": false}, {"text": "ours", "correct": false}, {"text": "our", "correct": true}, {"text": "they", "correct": false}], "correct": "our"}, {"question": "What is ______ ?”\nShe is a bank manager.”", "options": [{"text": "his job", "correct": false}, {"text": "she job", "correct": false}, {"text": "he job", "correct": false}, {"text": "her job", "correct": true}], "correct": "her job"}, {"question": "There was a fire in Carol’s house. We invited … to stay with … for a while.", "options": [{"text": "She, ours", "correct": false}, {"text": "Her, us", "correct": true}, {"text": "She, us", "correct": false}, {"text": "Her, ourselves", "correct": false}], "correct": "Her, us"}];
+
+const letters = ['A','B','C','D'];
+let state = {}; // qIndex -> selectedOptionIndex
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-main');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'card-' + qi;
+    card.style.animationDelay = Math.min(qi * 0.03, 1.5) + 's';
+
+    // Question text cleanup: remove repeated instruction lines if same as previous
+    let qText = q.question;
+    // If it has a newline, make the instruction line slightly muted
+    let qHtml = qText.replace(/\n/g, '\n');
+
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">${qi+1}</div>
+        <div class="q-text">${escHtml(qText)}</div>
+        <div class="q-status" id="status-${qi}"></div>
+      </div>
+      <div class="options" id="opts-${qi}">
+        ${q.options.map((opt, oi) => `
+          <button class="option-btn" id="opt-${qi}-${oi}" onclick="selectOption(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]||oi+1}</span>
+            ${escHtml(opt.text)}
+          </button>
+        `).join('')}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function selectOption(qi, oi) {
+  if (state[qi] !== undefined) return; // already answered
+  state[qi] = oi;
+  
+  const q = QUESTIONS[qi];
+  const isCorrect = q.options[oi].correct;
+  const card = document.getElementById('card-' + qi);
+  const statusEl = document.getElementById('status-' + qi);
+  
+  // Disable all options
+  q.options.forEach((_, i) => {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.classList.add('disabled');
+    if (i === oi) {
+      btn.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+    }
+    if (!isCorrect && q.options[i].correct) {
+      btn.classList.add('reveal-correct');
+    }
+  });
+
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  statusEl.textContent = isCorrect ? '✅' : '❌';
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(state).length;
+  const correct = Object.keys(state).filter(qi => QUESTIONS[qi].options[state[qi]].correct).length;
+  const wrong = answered - correct;
+  const total = QUESTIONS.length;
+
+  document.getElementById('progressBar').style.width = (answered/total*100).toFixed(1) + '%';
+  document.getElementById('progressLabel').textContent = answered + ' / ' + total;
+  document.getElementById('scoreBadge').innerHTML = `✓ ${correct} &nbsp;✗ ${wrong}`;
+  document.getElementById('answeredCount').textContent = answered;
+}
+
+function submitQuiz() {
+  const answered = Object.keys(state).length;
+  if (answered === 0) { alert("Hech bo'lmaganda bitta savolga javob bering!"); return; }
+  
+  const total = QUESTIONS.length;
+  const correct = Object.keys(state).filter(qi => QUESTIONS[qi].options[state[qi]].correct).length;
+  const wrong = answered - correct;
+  const pct = Math.round(correct / total * 100);
+
+  document.getElementById('quiz-main').style.display = 'none';
+  document.getElementById('submitBar').style.display = 'none';
+  
+  const rs = document.getElementById('result-screen');
+  rs.classList.add('show');
+  
+  document.getElementById('resCorrect').textContent = correct;
+  document.getElementById('resWrong').textContent = wrong;
+  document.getElementById('resPct').textContent = pct + '%';
+
+  let emoji, title, titleClass, sub, grade;
+  if (pct >= 90) { emoji='🏆'; title="A'lo darajada!"; titleClass='great'; sub="Siz ajoyib natijalarga erishdingiz!"; grade='5'; }
+  else if (pct >= 75) { emoji='🎯'; title="Yaxshi natija!"; titleClass='good'; sub="Bilimlaringiz yaxshi darajada!"; grade='4'; }
+  else if (pct >= 55) { emoji='📚'; title="O'rtacha"; titleClass='ok'; sub="Yana o'qish foydali bo'ladi."; grade='3'; }
+  else { emoji='💪'; title="Harakat qiling!"; titleClass='retry'; sub="Ko'proq mashq qilish kerak."; grade='2'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  const titleEl = document.getElementById('resultTitle');
+  titleEl.textContent = title;
+  titleEl.className = 'result-title ' + titleClass;
+  document.getElementById('resultSub').textContent = sub + ` (${correct}/${total} savol to'g'ri)`;
+  document.getElementById('resGrade').textContent = grade;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  state = {};
+  document.getElementById('result-screen').classList.remove('show');
+  document.getElementById('quiz-main').style.display = '';
+  document.getElementById('submitBar').style.display = '';
+  buildQuiz();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>
